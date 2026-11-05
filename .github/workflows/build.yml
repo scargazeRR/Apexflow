@@ -1,0 +1,35 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Erlaubt dir, den Build auf GitHub auch manuell per Button zu starten
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # Nutzt die stabile 3.11 Version
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Build EXE with PyInstaller
+      run: |
+        pyinstaller --noconsole --onefile --icon=assets/icon.ico --name ApexFlow src/main.py
+
+    - name: Upload EXE as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ApexFlow-Windows
+        path: dist/ApexFlow.exe
